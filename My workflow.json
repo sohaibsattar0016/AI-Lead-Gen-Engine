@@ -1,0 +1,1172 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        -112
+      ],
+      "id": "7ce4cc8c-af9e-4fee-9d82-c2d00feda535",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/places",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "19d0cb70ce31399e4bb71d806c3c8727e140e0c7"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q\": \"{{ $json.Industry }} companies in {{ $json.Country }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -32,
+        -96
+      ],
+      "id": "34df880e-8311-489b-bf22-12df9f4a053f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "places",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -96
+      ],
+      "id": "777093dd-04fa-4851-b2f4-9f4977e5a480",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "19d0cb70ce31399e4bb71d806c3c8727e140e0c7"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q\": \"site:linkedin.com/in 'Founder' OR 'CEO' '{{ $json.title }}'\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        384,
+        -96
+      ],
+      "id": "92e031e3-1770-4407-81d5-1d2cdd509d0a",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e423666c-4a4e-4e02-96a4-b59601da42d7",
+              "leftValue": "={{ !!$json.organic }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        -96
+      ],
+      "id": "abe50426-f0eb-4db5-9f7a-4d126953876f",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1RjZVsdxIMwM4OBLs_NzCBDXjBbWl2pJH0D51gGF4fOk",
+          "mode": "list",
+          "cachedResultName": "Lead_Generation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RjZVsdxIMwM4OBLs_NzCBDXjBbWl2pJH0D51gGF4fOk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1RjZVsdxIMwM4OBLs_NzCBDXjBbWl2pJH0D51gGF4fOk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Website": "={{ $('Split Out').item.json.website }}",
+            "Company Name": "={{ $('Split Out').item.json.title }}",
+            "LinkedIn Profile": "={{ $('HTTP Request1').item.json.organic[0].link }}",
+            "CEO/Founder Name": "={{ $('HTTP Request1').item.json.organic[0].title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Website",
+              "displayName": "Website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn Profile",
+              "displayName": "LinkedIn Profile",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CEO/Founder Name",
+              "displayName": "CEO/Founder Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "81f7c665-1125-45e1-bc66-5f057da75a76",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "l9MHbGEVuwM8fVxk",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Lead-gen",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        -96
+      ],
+      "id": "48a51c4d-2a73-4470-ab1b-20b469a68ebc",
+      "name": "Webhook",
+      "webhookId": "1c92eac0-1429-4de5-be04-a89c272ba227"
+    }
+  ],
+  "pinData": {
+    "Split Out": [
+      {
+        "json": {
+          "position": 1,
+          "title": "Peniel Technology LLC",
+          "address": "Office 205, NBQ Bank Building - 16th St - Khalid Bin Al Waleed Rd - Bur Dubai - Dubai - United Arab Emirates",
+          "latitude": 25.256508,
+          "longitude": 55.301662,
+          "rating": 4.9,
+          "ratingCount": 1200,
+          "category": "Software company",
+          "phoneNumber": "+971 50 961 7708",
+          "website": "https://www.penieltech.com/",
+          "cid": "17375712216878744120"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 2,
+          "title": "Xedos Technologies LLC - IT Support Dubai | IT AMC Services in Dubai | IT Solutions Company UAE | Tally Solutions in UAE",
+          "address": "Unigrove Business Centre, Al Dar University Building - Office 26,4th Floor - Al Garhoud - Dubai - United Arab Emirates",
+          "latitude": 25.2527,
+          "longitude": 55.33881,
+          "rating": 5,
+          "ratingCount": 72,
+          "category": "Software company",
+          "phoneNumber": "+971 52 607 3989",
+          "website": "https://xedos.ae/",
+          "cid": "15482944679534064588"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 3,
+          "title": "Meridian IT Solutions | Website Design Company in Dubai",
+          "address": "Office 1203 World, API World Tower - Sheikh Zayed Rd - Trade Center First - Dubai - United Arab Emirates",
+          "latitude": 25.22551,
+          "longitude": 55.283695,
+          "rating": 4.8,
+          "ratingCount": 46,
+          "category": "Software company",
+          "phoneNumber": "+971 4 386 9895",
+          "website": "https://www.meridianuae.com/",
+          "cid": "2005469697615208571"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 4,
+          "title": "Azinova Technologies LLC",
+          "address": "The Metropolis Tower - Office 1302 - Business Bay - Dubai - United Arab Emirates",
+          "latitude": 25.184923,
+          "longitude": 55.2769,
+          "rating": 4.4,
+          "ratingCount": 30,
+          "category": "Software company",
+          "phoneNumber": "+971 4 359 7000",
+          "website": "http://www.azinovatechnologies.com/",
+          "cid": "12921189577736675184"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 5,
+          "title": "FACTS ERP Software House L.L.C",
+          "address": "Mohd Malik & Sons Raffa Building - Office 201 - Khalid Bin Al Waleed Rd - Dubai - United Arab Emirates",
+          "latitude": 25.259378,
+          "longitude": 55.29365,
+          "rating": 4.6,
+          "ratingCount": 106,
+          "category": "Software company",
+          "phoneNumber": "+971 55 899 3902",
+          "website": "https://facts.ae/?utm_source=CMBlisting&utm_medium=organic",
+          "cid": "10710822144542114246"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 6,
+          "title": "Beveron Technologies",
+          "address": "Office 101, Building No. 6 - Dubai - United Arab Emirates",
+          "latitude": 25.1852,
+          "longitude": 55.279926,
+          "rating": 5,
+          "ratingCount": 130,
+          "category": "Software company",
+          "phoneNumber": "+971 55 764 8808",
+          "website": "https://www.beveron.com/",
+          "cid": "17965458369215774823"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 7,
+          "title": "VRS Technologies LLC",
+          "address": "Plot No. 365-128, Property No. S1, Al Quoz - near by KSR building Materials - Al Qouz Ind.second - Dubai - United Arab Emirates",
+          "latitude": 25.1416,
+          "longitude": 55.243084,
+          "rating": 4.9,
+          "ratingCount": 335,
+          "category": "Software company",
+          "phoneNumber": "+971 55 209 3531",
+          "website": "https://www.vrstech.com/",
+          "cid": "12487633023693821017"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 8,
+          "title": "Start Tech",
+          "address": "Souk Al Bahar - Sahaa Offices, Block C - Office 202 - Downtown Dubai - Dubai - United Arab Emirates",
+          "latitude": 25.19464,
+          "longitude": 55.276516,
+          "rating": 5,
+          "ratingCount": 46,
+          "category": "Software company",
+          "phoneNumber": "+971 800 78324",
+          "website": "https://start-tech.ae/",
+          "cid": "13506942033095735405"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 9,
+          "title": "D Tech IT Solutions",
+          "address": "Al Gaizi Plaza - 301 - Al Garhoud - Dubai - United Arab Emirates",
+          "latitude": 25.25279,
+          "longitude": 55.3388,
+          "rating": 4.9,
+          "ratingCount": 44,
+          "category": "Software company",
+          "phoneNumber": "+971 52 610 5132",
+          "website": "https://dtechitsolutions.com/",
+          "cid": "584274884007599556"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "position": 10,
+          "title": "First Bit",
+          "address": "Falcon House Building Office 104 - Dubai Investment Park First - Dubai - United Arab Emirates",
+          "latitude": 25.00364,
+          "longitude": 55.154545,
+          "rating": 4.7,
+          "ratingCount": 218,
+          "category": "Software company",
+          "phoneNumber": "+971 4 823 9612",
+          "website": "https://firstbit.ae/",
+          "cid": "11812037786197959596"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "HTTP Request1": [
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'Peniel Technology LLC'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Binson Samuel‏ - ‏The Chief Executive Officer (CEO) of Peniel ...",
+              "link": "https://ae.linkedin.com/in/binsonsamuel",
+              "snippet": "‏Binson Samuel‏ - ‏The Chief Executive Officer (CEO) of Peniel Technology LLC Specialist in Client-Focused IT & ERP Solutions‏ | LinkedIn.",
+              "position": 1
+            },
+            {
+              "title": "Jamal Hussain - Peniel Technology LLC | LinkedIn",
+              "link": "https://pk.linkedin.com/in/jamal-hussain-feb12",
+              "snippet": "I'm Jamal Hussain, a Frontend Engineer & UI/UX Designer with 5+ years of experience… · Experience: Peniel Technology LLC · Education: Sukkur IBA · Location: ...",
+              "position": 2
+            },
+            {
+              "title": "‏Betson Babu‏ - ‏--‏ | LinkedIn",
+              "link": "https://om.linkedin.com/in/betson-babu-2601b6347",
+              "snippet": "الموقع: ‏مسقط‏. عرض ملف ‏Betson Babu ... الخبرة. رسم بياني Peniel Technology LLC. Sales And Marketing Specialist. Peniel ...",
+              "date": "الخبرة: ‏Peniel Technology LLC‏",
+              "position": 3
+            },
+            {
+              "title": "Justin Samuel - Emerald Soft - LinkedIn",
+              "link": "https://ca.linkedin.com/in/peniel-technology",
+              "snippet": "We are an IT company based in UAE. Mainly deals with Accounting Softwares like Tally… · Experience: Emerald Soft · Location: United Arab Emirates · 442 ...",
+              "position": 4
+            },
+            {
+              "title": "Adrian Dyett - Peniel Solutions, LLC - LinkedIn",
+              "link": "https://www.linkedin.com/in/adriandyett",
+              "snippet": "Adrian Dyett. Peniel Solutions, LLC Valdosta State University. Atlanta Metropolitan Area. 1K followers 500 ...",
+              "position": 5
+            },
+            {
+              "title": "Balukiran B - Konceptdaddy - LinkedIn",
+              "link": "https://in.linkedin.com/in/balukiran-b-b783ab208?trk=public_profile_browsemap",
+              "snippet": "View Balukiran's full profile. Balukiran can introduce you to 1 people at Peniel Technology LLC.",
+              "position": 6
+            },
+            {
+              "title": "Andrew Anbalagar‏ - ‏Seasoned Business Development Leader",
+              "link": "https://ae.linkedin.com/in/andrewanbalagar",
+              "snippet": "Seasoned Business Development Leader | 2024 Star Performer Award Winner (Merint LLC) ... Peniel Technology LLC. مايو ٢٠١٣ - ديسمبر ٢٠١٨ 5 عام 8 شهر. Dubai, United ...",
+              "position": 7
+            },
+            {
+              "title": "Peniel Okonkwo - Koi Healthcare Services | LinkedIn",
+              "link": "https://www.linkedin.com/in/peniel-okonkwo",
+              "snippet": "Assertive professional and avid learner with a background in management, dentistry and… · Experience: Koi Healthcare Services · Education: Howard University ...",
+              "position": 8
+            },
+            {
+              "title": "Willliam Boea - Co-Founder & Partner - LinkedIn",
+              "link": "https://www.linkedin.com/in/williamboea",
+              "snippet": "Patrick Boea is a proven business leader who has built and sold multiple successful companies since 2014 and has over 15 years of marketing expertise.",
+              "position": 9
+            },
+            {
+              "title": "Bob Peniel Inapanuri - Architect - LinkedIn",
+              "link": "https://www.linkedin.com/in/bob-peniel-inapanuri-5903b8113",
+              "snippet": "Architect with 9+ years of experience in International firms and freelancing. Currently Architect in Allied works architecture, working in construction, urban ...",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'Xedos Technologies LLC - IT Support Dubai | IT AMC Services in Dubai | IT Solutions Company UAE | Tally Solutions in UAE'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'Meridian IT Solutions | Website Design Company in Dubai'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Jayaprakash Thayyil‏ - ‏Passionate about Possibilities, Driven by ...",
+              "link": "https://ae.linkedin.com/in/jpthayyil",
+              "snippet": "Managing Director. Meridian IT Solutions. مايو ٢٠٠٦⁦ ⁩ - الحالي 19 عام 10 شهر. Dubai, United Arab Emirates. رسم بياني Meridian Solutions Inc. Managing Director.",
+              "attributes": {
+                "Missing": "Company | Show results with:Company"
+              },
+              "position": 1
+            },
+            {
+              "title": "Manoj Joseph‏ - ‏Founder and Managing Director at Meridian Electric.",
+              "link": "https://ae.linkedin.com/in/manoj-joseph-a7237b7",
+              "snippet": "Founder and Managing Director at Meridian Electric.‏ · ‏Having 10 years of experience in Project Management, Engineering & Design of control systems related ...",
+              "position": 2
+            },
+            {
+              "title": "Hrishikesh Vedantam - Meridian Data Labs - LinkedIn",
+              "link": "https://in.linkedin.com/in/hrishikesh-vedantam",
+              "snippet": "Hrishikesh Vedantam. Meridian Data Labs Indian Institute of Information Technology Design & Manufacturing Kancheepuram. Hyderabad, Telangana, India.",
+              "position": 3
+            },
+            {
+              "title": "Vandana Wadhwa - Founder/CEO at Meridian R&C LLC | LinkedIn",
+              "link": "https://www.linkedin.com/in/vandana-wadhwa-06815b18",
+              "snippet": "Founder/CEO at Meridian R&C LLC · I am a human geographer and urban/regional planner, with a passionate interest in researching diverse issues that are tied ...",
+              "position": 4
+            },
+            {
+              "title": "Benedict Brady - Founder @ Meridian | LinkedIn",
+              "link": "https://www.linkedin.com/in/benedict-brady-713658135",
+              "snippet": "Founder @ Meridian · Experience: Meridian · Education: Harvard University · Location: San Francisco · 350 connections on LinkedIn. View Benedict Brady's ...",
+              "position": 5
+            },
+            {
+              "title": "Soma Sekhar Vedantam - Meridian Data Labs - LinkedIn",
+              "link": "https://in.linkedin.com/in/meridiandatalabs",
+              "snippet": "Meridian Data Labs leverages latest technology trends in Data Science and Machine… · Experience: Meridian Data Labs · Education: Indian Institute of ...",
+              "position": 6
+            },
+            {
+              "title": "‏JUNAID ANSARI‏ - ‏Head - Partner Ecosystem EMEA @ Adrenalin ...",
+              "link": "https://qa.linkedin.com/in/junaid-ansari-4b759417",
+              "snippet": "Meridian Solutions. سبتمبر ٢٠٢٣ - أغسطس ٢٠٢٤ 1 عام واحد. Dubai, United Arab ... Office Automation, SaaS, ICT Solutions Sales Professional with 20+ years ...",
+              "position": 7
+            },
+            {
+              "title": "Krishnan Subramaniam - Director - Growth and Strategy | LinkedIn",
+              "link": "https://in.linkedin.com/in/krishnan-subramaniam-16272714",
+              "snippet": "The companies of Meridian Group help organizations optimize the strategic value of their IT investments ... Company Website: http://www.meridianitindia.com.",
+              "position": 8
+            },
+            {
+              "title": "Nikhil R. Srivastava - Co-Founder | CTO | Technology Leader",
+              "link": "https://in.linkedin.com/in/nikhilrsrivastava",
+              "snippet": "I am a technology executive with 15+ years of experience driving enterprise software innovation, digital transformation, and scalable product development ...",
+              "position": 9
+            },
+            {
+              "title": "‏Nasir Aslam‏ - ‏Managing Director at Meridian Ikon‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/nasir-aslam-11aa6647",
+              "snippet": "Represent US, UK, European and China based manufacturers in the Middle East. Established long term relationships with suppliers and multi-national accounts.",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'Azinova Technologies LLC'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Dr. Shani L. Ganga‏ - ‏Mogao Restobar & Lounge - LinkedIn",
+              "link": "https://ae.linkedin.com/in/shanilganga",
+              "position": 1
+            },
+            {
+              "title": "Nasir khan khadukhel - System and Network Engineer | LinkedIn",
+              "link": "https://pk.linkedin.com/in/nasir-khan-khadukhel-a5a97a130",
+              "snippet": "Experience ; IT Specialist. Azinova Technologies. Jan 2020 ; System Engineer. Smart Brains Technologies. Sep 2018 ; Network Engineer. PTCL. Mar 2015 ...",
+              "position": 2
+            },
+            {
+              "title": "Sunil Krishnan - Digital Marketing Consultant - LinkedIn",
+              "link": "https://in.linkedin.com/in/sunil-krishnan-digital-marketing",
+              "snippet": "Experience ; Digital Marketing Manager. GriffinMark Technologies Pvt. Ltd. Aug 2018 ; Digital Marketing Executive. Azinova Technologies. Jun 2014 ; Search Engine ...",
+              "position": 3
+            },
+            {
+              "title": "Abdul Afeef - CEO | Co-Founder @ Yoro Technology - LinkedIn",
+              "link": "https://in.linkedin.com/in/abdulafeefn?trk=people-guest_people_search-card",
+              "snippet": "CEO | Co-Founder @ Yoro Technology · Software Developer Dotnet having 7 ... Azinova Technologies LLC. Dec 2016 - Nov 2018 2 years. Dubai, United Arab ...",
+              "position": 4
+            },
+            {
+              "title": "Sruthi Maria Thomson - Founder of Emmie's Tuition Centre | LinkedIn",
+              "link": "https://in.linkedin.com/in/sruthi-maria-thomson-226a08150",
+              "snippet": "Experienced Associate Software Engineer with a demonstrated history of working in the information technology and services industry.",
+              "position": 5
+            },
+            {
+              "title": "Malini Jeyapaul - Azinova Technologies | LinkedIn",
+              "link": "https://in.linkedin.com/in/malini-jeyapaul-15ba4911a",
+              "snippet": "Experience: Azinova Technologies · Education: Manonmaniam Sundaranar University · Location: Thiruvananthapuram Taluk · 76 connections on LinkedIn.",
+              "attributes": {
+                "Missing": "LLC' | Show results with:LLC'"
+              },
+              "position": 6
+            },
+            {
+              "title": "‏Pooja Nair‏ - ‏PMP Certified | IT - Project Manager‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/pooja-nair-7a41491a4",
+              "snippet": "An experienced Project co-coordinator who collaborates with team members to explain the SOW, create WBS, organize and assign tasks and getting things done.",
+              "attributes": {
+                "Missing": "'Founder' | Show results with:'Founder'"
+              },
+              "position": 7
+            },
+            {
+              "title": "Salman S‏ - ‏Azinova Technologies - LinkedIn",
+              "link": "https://ae.linkedin.com/in/salman-ik",
+              "snippet": "Salman S. Azinova Technologies St.Anne's College of Engineering and Technology ... Azinova Technologies. Dubai, United Arab Emirates. -. United Arab Emirates ...",
+              "attributes": {
+                "Missing": "'Founder' LLC'"
+              },
+              "position": 8
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'FACTS ERP Software House L.L.C'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "‏Sreekumar Pillai‏ - ‏Chief Software Architect‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/sreekumar-pillai-66576a1b",
+              "position": 1
+            },
+            {
+              "title": "FACTS Computer Software House L.L.C‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/facts-computer-software-house",
+              "snippet": "FACTS Computer Software House L.L.C. was founded in 2002 in Dubai, United Arab Emirates… مقالات Facts Computer.",
+              "position": 2
+            },
+            {
+              "title": "Anil Khanna - Founder and CEO - We are hiring ERP experts!",
+              "link": "https://www.linkedin.com/in/anilkhanna",
+              "snippet": "Founder and CEO - We are hiring ERP experts! · Flex assists organizations in achieving their potential through better sales and operations management.",
+              "position": 3
+            },
+            {
+              "title": "Mohamed Magdy‏ - ‏Founder, CEO @ Solution ERP | IEA Certified",
+              "link": "https://qa.linkedin.com/in/mohamed-magdy-b81752b3",
+              "snippet": "With over seven years of work experience in various accounting roles, I am a founder of Solution ERP, a company that provides customized and integrated ...",
+              "position": 4
+            },
+            {
+              "title": "Fayzulloh Abdullayev - Founder, CEO, ERP expert | LinkedIn",
+              "link": "https://uz.linkedin.com/in/fayzulloh-abdullayev",
+              "snippet": "Founder, CEO, ERP expert · Experienced backend developer turned tech entrepreneur. Specialized in building scalable web applications using Python, Django, ...",
+              "position": 5
+            },
+            {
+              "title": "Ramakant Singh - CEO at Intelli ERP Software, LLC. SAP Certified ...",
+              "link": "https://www.linkedin.com/in/intelliramakantsingh",
+              "snippet": "Ramakant Singh · CEO at Intelli ERP Software, LLC. SAP Certified HCM/Payroll Consultant · View mutual connections with Ramakant · About · Experience · Education.",
+              "position": 6
+            },
+            {
+              "title": "MOHSIN FIAZ - Founder & CEO – Virtual Software Company LLC",
+              "link": "https://pk.linkedin.com/in/mohsinfiaz",
+              "snippet": "I am the Founder & CEO of Virtual Software Company LLC, a global software and AI solutions firm operating for over a decade and serving clients across 40+ ...",
+              "position": 7
+            },
+            {
+              "title": "Dean P. - President & CEO - LinkedIn",
+              "link": "https://www.linkedin.com/in/deanpoulos",
+              "snippet": "President & CEO · Experienced Chief Executive Officer with a demonstrated history of working in the Information Technology Industry.",
+              "position": 8
+            },
+            {
+              "title": "‏Deepak Menon‏ - ‏FACTS Computer Software House‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/deepak-menon-b56b74137",
+              "position": 9
+            },
+            {
+              "title": "Pranita Phadke‏ - ‏FACTS Computer Software House L.L.C - LinkedIn",
+              "link": "https://ae.linkedin.com/in/pranita-phadke-08965714b",
+              "snippet": "Pranita Phadke. FACTS Computer Software House L.L.C M.G.M's Jawaharlal Nehru ... الخبرة. رسم بياني FACTS Computer Software House L.L.C. FACTS Computer Software ...",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'Beveron Technologies'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "‏Brijesh Chedayan‏ - ‏دبي الإمارات العربية المتحدة‏ | ملف شخصي احترافي",
+              "link": "https://ae.linkedin.com/in/brijeshc",
+              "position": 1
+            },
+            {
+              "title": "Dibu Peter‏ - ‏Beveron Technologies - LinkedIn",
+              "link": "https://ae.linkedin.com/in/dibu-peter-196b6aa",
+              "position": 2
+            },
+            {
+              "title": "‏Prajin Premarajan‏ - ‏Beveron Technologies‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/prajin-premarajan-110912171",
+              "snippet": "Prajin Premarajan. Beveron Technologies Bangalore University. الإمارات العربية المتحدة. ١٩٢ متابع ١٨٧ زميل.",
+              "position": 3
+            },
+            {
+              "title": "‏Haritha Sanesh‏ - ‏Beveron Technologies‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/haritha-sanesh-75a25528",
+              "snippet": "التعليم: ‏Kannur University‏ · الموقع: ‏دبي‏ · ‏53‏ ‏زميل‏ على LinkedIn. عرض ملف ‏Haritha Sanesh‏ ‏‏ الشخصي على LinkedIn، ...",
+              "date": "الخبرة: ‏Beveron Technologies‏",
+              "position": 4
+            },
+            {
+              "title": "Muhammed Musthaq - Creative Director | LinkedIn",
+              "link": "https://in.linkedin.com/in/muhammed-musthaq-0567ba141",
+              "snippet": "I'm a seasoned Creative Director and Video Editor with 7 years of experience in the media industry. My journey began with a love for storytelling, which evolved ...",
+              "position": 5
+            },
+            {
+              "title": "Ahammed Sinaan | Mtech Integrated Data Science at VIT Vellore",
+              "link": "https://in.linkedin.com/in/ahammed-sinaan-02b98128a",
+              "snippet": "View Ahammed's full profile. Ahammed can introduce you to 2 people at Beveron Technologies.",
+              "position": 6
+            },
+            {
+              "title": "Poorna S‏ - ‏Assistant sales executive - LinkedIn",
+              "link": "https://ae.linkedin.com/in/poorna-s-2b0033226",
+              "snippet": "Hi I am Poorna , a dynamic professional with a multifaceted background in Business Coordination and Development, Interior Design, and Civil Engineering.",
+              "position": 7
+            },
+            {
+              "title": "Mayank Jhunjhunwala - Quantum Leap Learning Solutions Pvt. Ltd.",
+              "link": "https://in.linkedin.com/in/jjwmayank",
+              "snippet": "Business Transformation & Growth Consulting Leader with 9+ years of experience helping… · Experience: Quantum Leap Learning Solutions Pvt. Ltd. · Education: ...",
+              "position": 8
+            },
+            {
+              "title": "Gülşah Bostan - Associate @ Vircon Legal | LinkedIn",
+              "link": "https://tr.linkedin.com/in/gulsahbostan",
+              "snippet": "Hello, I'm Gülşah A legal trainee on the Turkish bar track at a crypto-native firm recognised by The Legal 500. I support multinational fintech/payments ...",
+              "position": 9
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'VRS Technologies LLC'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Rajender Jinna‏ - ‏Managing Director at VRS Technologies L.L.C",
+              "link": "https://ae.linkedin.com/in/rajjinna",
+              "position": 1
+            },
+            {
+              "title": "Mukesh krishna - VRS Technologies L.L.C. | LinkedIn",
+              "link": "https://in.linkedin.com/in/mukesh-krishna-82a539224",
+              "snippet": "Mukesh krishna. VRS Technologies L.L.C. Anna University. Chennai, Tamil Nadu, India. 807 followers ...",
+              "position": 2
+            },
+            {
+              "title": "Rakesh Shrestha - Chief Executive Officer at Technogen Nepal Pvt ...",
+              "link": "https://np.linkedin.com/in/rakesh-shrestha-549a79277",
+              "snippet": "Experience ; Chief Executive Officer. TECHNOGEN NEPAL. Apr 2019 - Present 6 years 11 months ; Chief Executive Officer. VRS Technologies L.L.C.. Feb 2015 - Sep ...",
+              "position": 3
+            },
+            {
+              "title": "Srinivas Jinna - VRS Technologies, LLC - LinkedIn",
+              "link": "https://in.linkedin.com/in/srinivas-jinna-13843477",
+              "snippet": "Experience: VRS Technologies, LLC · Education: Vaagdevi Engineering College · Location: Warangal · 13 connections on LinkedIn. View Srinivas Jinna's profile ...",
+              "position": 4
+            },
+            {
+              "title": "‏Premsan Bebarta‏ - ‏VRS Technologies L.L.C.‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/premsan-bebarta-33bab476",
+              "snippet": "Premsan Bebarta. VRS Technologies L.L.C. IMMANUEL BUSINESS SCHOOL. الإمارات العربية المتحدة. ١ ألف متابع أكثر من 500 زميل. رؤية زملائك المشتركين. عرض الزملاء ...",
+              "position": 5
+            },
+            {
+              "title": "NAZEER AHAMED - VRS Technologies LLC - LinkedIn",
+              "link": "https://ae.linkedin.com/in/nazeer-ahamed-a82990249",
+              "snippet": "Information Technology Engineer at VRS Technologies L.L.C. · عرض الزملاء المشتركين مع NAZEER · مرحبًا بعودتك · الخبرة · عرض ملف NAZEER الشخصي الكامل.",
+              "date": "NAZEER AHAMED",
+              "position": 6
+            },
+            {
+              "title": "‏uday saidhu‏ - ‏VRS Technologies L.L.C.‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/uday-saidhu-20ba79266",
+              "snippet": "Sales Leader and Relationship builder by day, yogi at night. Accomplished, results-driven…‏ · الخبرة: ‏VRS Technologies L.L.C.‏ · التعليم: ‏Jawaharlal Nehru ...",
+              "position": 7
+            },
+            {
+              "title": "Vorsu S. - VRS Technologies L.L.C. | LinkedIn",
+              "link": "https://in.linkedin.com/in/vorsusulochana",
+              "snippet": "Finance & Accounting Manager with 20 years Experience in India–International… · Experience: VRS Technologies L.L.C. · Education: Osmania University, ...",
+              "position": 8
+            },
+            {
+              "title": "‏Ashish Kumar Enchure‏ - ‏IT Infrastructure | Cyber Security - LinkedIn",
+              "link": "https://ae.linkedin.com/in/ashish-kumar-enchure-66835b167",
+              "snippet": "CEO and Founder. ASH CODE INFORMATION TECHNOLOGY. مارس ٢٠٢٣⁦ ⁩ - الحالي 3 عام. Dubai, United Arab Emirates. رسم بياني VRS Technologies, LLC ... Trufocuz ...",
+              "position": 9
+            },
+            {
+              "title": "Konstantin A. Danilov, CFA - Iron Eagle Capital - LinkedIn",
+              "link": "https://www.linkedin.com/in/konstantindanilov",
+              "snippet": "Konstantin is a Managing Director at VRS Restructuring Services, LLC (“VRS”) and VRS… · Experience: Iron Eagle Capital · Education: Massachusetts Institute ...",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'Start Tech'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Abhishek Bansal - Co-Founder at Start-Tech Academy",
+              "link": "https://in.linkedin.com/in/abhishekbansaltech",
+              "snippet": "Diligent and detailed oriented professional, co-founder of Start-Tech Academy, interested in learning and teaching Data Analysis and Machine Learning ...",
+              "position": 1
+            },
+            {
+              "title": "Pukhraj Parikh - Co-Founder at Start-Tech Academy",
+              "link": "https://in.linkedin.com/in/pukhraj-parikh",
+              "snippet": "Co-founder at Start-Tech Academy, a technology-based Analytics Education Company and aims… · Experience: Start-Tech Academy · Education: Indian Institute of ...",
+              "position": 2
+            },
+            {
+              "title": "shayan saifi - CEO at Start tech industries - LinkedIn",
+              "link": "https://in.linkedin.com/in/shayan-saifi-2aba99153",
+              "snippet": "CEO at Start tech industries · Star tech Industries · Experience: Startech Industries · Education: R.D. ENGINEERING COLLEGE, DUHAI, GHAZIABAD · Location: ...",
+              "position": 3
+            },
+            {
+              "title": "Ali Kwika: CTO, AI & Fintech",
+              "link": "https://ae.linkedin.com/in/alifouad91",
+              "position": 4
+            },
+            {
+              "title": "Cetin Karakus - Founder & CEO of World Star Tech",
+              "link": "https://ca.linkedin.com/in/cetin-karakus",
+              "snippet": "Cetin Karakus. WORLD STAR TECH Clarkson University. Toronto, Ontario, Canada. 814 followers 500 ...",
+              "position": 5
+            },
+            {
+              "title": "D'Andre Harris - Tech start-up founder | LinkedIn",
+              "link": "https://www.linkedin.com/in/d%E2%80%99andre-harris-06569575",
+              "snippet": "Tech start-up founder · Tech start-up founder, and federal government contractor. · Experience: Self-employed · Education: Full Sail University · Location: ...",
+              "position": 6
+            },
+            {
+              "title": "Jean-Luc David - Tech Leader, Startup Founder, Proud Dad | LinkedIn",
+              "link": "https://ca.linkedin.com/in/jeanlucdavid",
+              "snippet": "I'm a technology leader with over 20 years of experience in scaling & running first-rate software engineering teams that reliably deliver features and value ...",
+              "position": 7
+            },
+            {
+              "title": "Tim Burke - GTM Strategist | Serial Tech Founder",
+              "link": "https://ca.linkedin.com/in/t1mburke",
+              "snippet": "Over the past 20+ years, I've co-founded and led both bootstrapped and VC-backed startups across AI, SaaS, mobile, and media. I've raised over >$10M in venture ...",
+              "position": 8
+            },
+            {
+              "title": "Tosin Kuye - Co-Founder @ Stealth Startup - LinkedIn Profile",
+              "link": "https://ca.linkedin.com/in/tosin-kuye",
+              "snippet": "I got my start with a degree in Computer Science from the University of Alberta. I blend my technical know-how with an entrepreneurial spirit. I was also a part ...",
+              "position": 9
+            },
+            {
+              "title": "Yinan GU, Ex-Tech Startup Founder, Executive Coach",
+              "link": "https://www.linkedin.com/in/yinan-gu",
+              "snippet": "I am currently working as a business coach for Founder's Club to empower Chinese entrepreneurs in the USA. My mentoring focuses on elevator pitches, product fit ...",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'D Tech IT Solutions'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Darrell Doram - CEO at D-Tech Solution - LinkedIn",
+              "link": "https://an.linkedin.com/in/darrell-doram-4346aa185",
+              "snippet": "Experience · Deputy CEO. D-Tech Solution. Apr 2013 - Present 12 years 11 months · Repair Specialist. D-Tech Solution. 2013 - 2025 12 years. Workstation setup",
+              "position": 1
+            },
+            {
+              "title": "Deshaun Taylor - CEO at D Tech Solutions | LinkedIn",
+              "link": "https://kn.linkedin.com/in/deshaun-taylor-8a89a032",
+              "snippet": "CEO at D Tech Solutions · Experience: D Tech · Location: Saint Kitts and Nevis · 39 connections on LinkedIn. View Deshaun Taylor's profile on LinkedIn, ...",
+              "position": 2
+            },
+            {
+              "title": "dnyaneshwar parade - Owner, D-tech it solution - LinkedIn",
+              "link": "https://in.linkedin.com/in/dnyaneshwar-parade-7a940240",
+              "snippet": "Owner, D-tech it solution · Experience: D-tech it solution · Location: Pune. View dnyaneshwar parade's profile on LinkedIn, a professional community of 1 ...",
+              "position": 3
+            },
+            {
+              "title": "Burdy Jean-Louis - CEO at D-Tech - LinkedIn",
+              "link": "https://www.linkedin.com/in/burdy-jean-louis-256a078",
+              "snippet": "CEO at D-Tech · Experience: D-Tech · Location: New York · 1 connection on LinkedIn. View Burdy Jean-Louis' profile on LinkedIn, a professional community of ...",
+              "position": 4
+            },
+            {
+              "title": "Chinmay Darekar - Founder at D-Tech Solutions - LinkedIn",
+              "link": "https://in.linkedin.com/in/chinmay-darekar-4154bb102",
+              "snippet": "Founder at D-Tech Solutions · Experience: D-Tech Solutions · Education: J.S.P.M · Location: Pune. View Chinmay Darekar's profile on LinkedIn, a professional ...",
+              "position": 5
+            },
+            {
+              "title": "Anuj Awasthi - Founder & Director at MTX Labs (Medetronix ...",
+              "link": "https://in.linkedin.com/in/awasthianuj",
+              "snippet": "Experience ; Founder. DTech Solutions. Apr 2021 - Present 4 years 11 months ; Founder. Medetronix Labs. Apr 2022 - Present 3 years 11 months ; Director. Kanopy ...",
+              "position": 6
+            },
+            {
+              "title": "Dhruv patel - Dtech IT Solutions | LinkedIn",
+              "link": "https://au.linkedin.com/in/dhruv-patel-aa53a011a",
+              "snippet": "Dhruv patel. Dtech IT Solutions Federation University Australia. Melbourne, Victoria, Australia. 447 followers ...",
+              "position": 7
+            },
+            {
+              "title": "Mustafa Baris AKVERDI - Oracle DBA & APEX Specialist - LinkedIn",
+              "link": "https://uk.linkedin.com/in/mustafa-baris-akverdi-a5366012",
+              "snippet": "Founder & CEO at DTech Bilişim | Empowering businesses through cybersecurity, digital transformation, and enterprise solutions.",
+              "position": 8
+            },
+            {
+              "title": "Ariel Polakewicz Peleg‏ - ‏Owner \\ CEO at D-Tech Infrastructure Ltd",
+              "link": "https://il.linkedin.com/in/ariel-polakewicz-peleg-34318938",
+              "snippet": "D-Tech Infrastructure was founded in 2004 and, from the very beginning of its operations has been working to change acceptable norms of planning and execution ...",
+              "position": 9
+            },
+            {
+              "title": "Rapfhel Adenola - D-Tech Solutions LLC | LinkedIn",
+              "link": "https://www.linkedin.com/in/rapfhel-adenola-83a2b480/es?trk=people-guest_people_search-card",
+              "snippet": "Rapfhel Adenola. D-Tech Solutions LLC Salisbury University. United States. 1K followers 500+ ...",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "searchParameters": {
+            "q": "site:linkedin.com/in 'Founder' OR 'CEO' 'First Bit'",
+            "type": "search",
+            "engine": "google"
+          },
+          "organic": [
+            {
+              "title": "Vinayak Ujalambe - FirstBit Solutions Pune - LinkedIn",
+              "link": "https://in.linkedin.com/in/vinayak-ujalambe-09826866",
+              "snippet": "I'm Vinayak Ujalambe. Founder of FirstBitSolutions.com — but more than that, I'm a… · Experience: FirstBit Solutions Pune · Education: University of Pune ...",
+              "position": 1
+            },
+            {
+              "title": "‏Alexandr Smolyaninov‏ - ‏First Bit Middle East‏ | LinkedIn",
+              "link": "https://ae.linkedin.com/in/alexandrsmolyaninov",
+              "snippet": "With over 20 years of experience in the IT industry, I am a seasoned partner and software…‏ · الخبرة: ‏First Bit Middle East‏ · التعليم: ‏Moscow Business ...",
+              "position": 2
+            },
+            {
+              "title": "Jacob Dawson - Founder and CEO | LinkedIn",
+              "link": "https://ca.linkedin.com/in/jacob-dawson-ab26708b",
+              "snippet": "Founder and CEO · Partnering with business leaders and the investment community on capital markets strategy. Licenses and Certifications: • Series 7 – FINRA ...",
+              "position": 3
+            },
+            {
+              "title": "Steve de Jong - CEO, Founder | LinkedIn",
+              "link": "https://ca.linkedin.com/in/steve-de-jong-06241544",
+              "snippet": "CEO, Founder · Steve is the co-founder and CEO of VRIFY. His passion lies in developing new technology to advance resource exploration into the future.",
+              "position": 4
+            },
+            {
+              "title": "Davyd Funk - President & CEO - LinkedIn",
+              "link": "https://ca.linkedin.com/in/davydfunk",
+              "snippet": "President & CEO · Building and implementing strategic growth plans with an emphasis on timelines and profitability is what I do well.",
+              "position": 5
+            },
+            {
+              "title": "Nima Boroumand - Founder & CEO at Bit One IT Solutions, LLC",
+              "link": "https://www.linkedin.com/in/nimaboroumand",
+              "snippet": "Bit One IT Solutions, LLC is an IT consulting firm founded in 2015 based in Laguna Hills, California. Our goal is to provide excellent IT services.",
+              "date": "Nov 10, 2025",
+              "position": 6
+            },
+            {
+              "title": "Boris Goldstein - Founder, CEO BrainBit Inc. - LinkedIn",
+              "link": "https://www.linkedin.com/in/borisgoldstein1",
+              "snippet": "Founder, CEO BrainBit Inc. · Seasoned executive with a proven talent for aligning global business strategies with established and emerging management teams.",
+              "position": 7
+            },
+            {
+              "title": "Saje Sandhu - Bit.ai - LinkedIn",
+              "link": "https://www.linkedin.com/in/sajesandhu",
+              "snippet": "Experience: Bit.ai · Location: San Francisco · 500+ connections on LinkedIn. View Saje Sandhu's profile on LinkedIn, a professional community of 1 billion ...",
+              "position": 8
+            },
+            {
+              "title": "Roger Lvin | Powering digital transformations for a sustainable world",
+              "link": "https://www.linkedin.com/in/rogerlvin",
+              "snippet": "Roger Lvin · CEO | Board Member | Powering digital transformations for a sustainable world · View mutual connections with Roger · About · Experience · Education.",
+              "position": 9
+            },
+            {
+              "title": "Matt Gray - Founder & CEO, Founder OS | Proven systems to grow a ...",
+              "link": "https://www.linkedin.com/in/mattgray1",
+              "snippet": "I help entrepreneurs remove themselves from operations, grow on autopilot with content and an engaged audience, and automate core systems. I'm the founder of ...",
+              "position": 10
+            }
+          ],
+          "credits": 1
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "01580c03-d85c-4422-9623-d2e046935324",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b07865c8a783ad9a68c5f2ea3c2963bebccabdde2fa862dc5eb5dfd2b3cbc8ca"
+  },
+  "id": "Wnd2RaXiL6oKwTRK",
+  "tags": []
+}
